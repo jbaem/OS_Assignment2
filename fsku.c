@@ -183,6 +183,14 @@ void WriteFile(char* file_name, int word_size) {
 		word_size--;
 	}
 
+	if(word_size > 0) {
+		if(curr_inode->blocks == 1) {
+			curr_inode->iptr = FindDBmap();
+		}
+		curr_inode->blocks++;
+		WriteFile(file_name, word_size);
+	}
+
 	return;
 }
 void ReadFile(char* file_name, int word_size) {
@@ -290,7 +298,7 @@ int CreateFile(char* file_name) {
 	int inode_index = empty_entry_index + 3;
 	Inode* inode = ((Inode*)(data_storage + I_BLOCK_BASE) + inode_index);
 	inode->fsize = 0;
-	inode->blocks = 0;
+	inode->blocks = 1;
 	inode->dptr = 0;
 	inode->iptr = 0;
 
@@ -348,4 +356,24 @@ int FindFile(char* file_name) {
 	}
 
 	return -1;
+}
+
+int FindDBmap() {
+	int index = 0;
+	unsigned char* curr_dbmap = data_storage + D_BMAP_BASE;
+	for(int i = 0; i < BLOCK_SIZE / 2; ++i) {
+		unsigned char curr = *(curr_dbmap + i);
+		
+		if (curr != 0xFF) {
+			for (int j = 0; j < 8; ++j) {
+				if ((curr & (1 << (7 - j))) == 0) {
+					return index + j;
+				}
+			}
+		}
+
+		index += 8;
+	}
+
+	return index;
 }
