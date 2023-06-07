@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
 	InitDataStorage();
 	InitRootDirectory();
 
-	FileSystem("input_file.txt");
+	FileSystem(argv[1]);
 
 	free(data_storage);
 
