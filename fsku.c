@@ -266,7 +266,7 @@ void DeleteFile(char* file_name) {
 		int byte_index = curr_inode->iptr / 8;
 		int bit_index = curr_inode->iptr % 8;
 		*(data_storage + D_BMAP_BASE + byte_index) &= ~(1 << (7 - bit_index));
-		//memset(data_storage + D_BMAP_BASE + BLOCK_SIZE * curr_inode->iptr, 0, BLOCK_SIZE);
+		memset(data_storage + D_BMAP_BASE + BLOCK_SIZE * curr_inode->iptr, 0, BLOCK_SIZE);
 	}
 	//dbmap에서 dptr 값 삭제
 	int byte_index = curr_inode->dptr / 8;
