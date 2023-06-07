@@ -42,10 +42,10 @@ typedef struct {
 unsigned char* data_storage;
 
 int main(int argc, char* argv[]) {
-//	if (argc != 2) {
-//		printf("Error: the number of arguments.\n");
-//		return 1;
-//	}
+	if (argc != 2) {
+		printf("Error: the number of arguments.\n");
+		return 1;
+	}
 
 	InitDataStorage();
 	InitRootDirectory();
@@ -205,7 +205,7 @@ void WriteFile(char* file_name, int word_size) {
 void ReadFile(char* file_name, int word_size) {
 	int curr_ibmap_index = FindFile(file_name);
 	if (curr_ibmap_index == -1) {
-		printf("Error: File not found.");
+		printf("No such file.");
 		return;
 	}
 
@@ -246,48 +246,50 @@ void ReadFile(char* file_name, int word_size) {
 void DeleteFile(char* file_name) {
 	int curr_ibmap_index = FindFile(file_name);
 	if (curr_ibmap_index == -1) {
-		printf("Error: File not found.\n");
+		printf("No such file.\n");
 		return;
 	}
-
-	// Update inode and directory entry
 	Inode* curr_inode = ((Inode*)(data_storage + I_BLOCK_BASE) + curr_ibmap_index);
+	if (curr_inode->iptr != 0) {
+		int* curr_iptr = (int*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * curr_inode->iptr);
+
+		for (int i = 0; i < BLOCK_SIZE / 4; ++i) {
+			int dbmap_index = *(curr_iptr + i);
+			if (*(curr_iptr + i) != 0) {
+				int byte_index = dbmap_index / 8;
+				int bit_index = dbmap_index % 8;
+				*(data_storage + D_BMAP_BASE + byte_index) &= ~(1 << (7 - bit_index));
+				memset(data_storage + D_BMAP_BASE + BLOCK_SIZE * *(curr_iptr + i), 0, BLOCK_SIZE);
+			}
+		}
+		//dbmap에서 iptr 값 삭제
+		int byte_index = curr_inode->iptr / 8;
+		int bit_index = curr_inode->iptr % 8;
+		*(data_storage + D_BMAP_BASE + byte_index) &= ~(1 << (7 - bit_index));
+		memset(data_storage + D_BMAP_BASE + BLOCK_SIZE * curr_inode->iptr, 0, BLOCK_SIZE);
+	}
+	//dbmap에서 dptr 값 삭제
+	int byte_index = curr_inode->dptr / 8;
+	int bit_index = curr_inode->dptr % 8;
+	*(data_storage + D_BMAP_BASE + byte_index) &= ~(1 << (7 - bit_index));
+	memset(data_storage + D_BMAP_BASE + BLOCK_SIZE * curr_inode->dptr, 0, BLOCK_SIZE);
+
 	curr_inode->fsize = 0;
-	curr_inode->blocks = 0;
 	curr_inode->dptr = 0;
+	curr_inode->blocks = 0;
 	curr_inode->iptr = 0;
 
-	DirectoryEntry* entry = ((DirectoryEntry*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * 0)); // Assuming root directory is at inode 0
+	//ibmap에서 inum에 해당 하는 값 삭제
+	DirectoryEntry* dir_entry = ((DirectoryEntry*)(data_storage + D_BLOCK_BASE) + curr_ibmap_index - 3);
 
-	// Find the corresponding entry and mark it as unused
-	for (int i = 0; i < BLOCK_SIZE / ENTRY_SIZE; ++i) {
-		if ((entry + i)->inum == curr_ibmap_index + 2) {
-			(entry + i)->inum = 0;
-			break;
-		}
-	}
+	byte_index = dir_entry->inum / 8;
+	bit_index = dir_entry->inum % 8;
+	*(data_storage + I_BMAP_BASE + byte_index) &= ~(1 << (7 - bit_index));
 
-	// Clear block bitmap
-	unsigned char* dbmap = (data_storage + D_BMAP_BASE);
-	int block_byte_index = curr_inode->dptr / 8;
-	int block_bit_index = curr_inode->dptr % 8;
-	dbmap[block_byte_index] &= ~(1 << (7 - block_bit_index));
-
-	// Clear indirect block bitmap
-	if (curr_inode->blocks > 1) {
-		int* pre_block = (int*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * curr_inode->iptr);
-		for (int i = 0; i < BLOCK_SIZE / 4; ++i) {
-			int indirect_block = *(pre_block + i);
-			if (indirect_block == 0) {
-				break;
-			}
-			int ind_block_byte_index = indirect_block / 8;
-			int ind_block_bit_index = indirect_block % 8;
-			dbmap[ind_block_byte_index] &= ~(1 << (7 - ind_block_bit_index));
-		}
-	}
-
-	printf("File '%s' deleted.\n", file_name);
+	//inum = 0 으로 만들어
+	dir_entry->inum = 0;
+	dir_entry->fileName[0] = 0;
+	dir_entry->fileName[1] = 0;
 }
 /* */
 int CreateFile(char* file_name) {
@@ -310,6 +312,10 @@ int CreateFile(char* file_name) {
 	inode->blocks = 0;
 	inode->dptr = FindDBmap();
 	inode->iptr = 0;
+
+	int byte_index = inode_index / 8;
+	int bit_index = inode_index % 8;
+	*(data_storage + I_BMAP_BASE + byte_index) |= (1 << (7 - bit_index));
 
 	return inode_index;
 }
