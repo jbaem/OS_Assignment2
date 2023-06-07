@@ -5,4 +5,3 @@ Aa w 6000
 Aa r 20
 Aa r 550
 KU r 20
-Aa d
