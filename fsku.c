@@ -25,6 +25,7 @@ int CreateFile(char* file_name);
 int AllocateNewBlock();
 int FindEmptySpace();
 int FindFile(char*);
+int FindDBmap();
 
 typedef struct {
 	unsigned int fsize;
