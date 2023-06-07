@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
 	FileSystem(argv[1]);
 	
 	free(data_storage);
-
+	
 	return 0;
 }
 /* super, i=0,1 */
@@ -118,13 +118,14 @@ void FileSystem(char* input_file_name) {
 	
 	/* EOF -> all bits in hexadecimal */
 	fclose(input_file);
-
+	int temp = 0;
 	for (int i = 0; i < BLOCK_NUM * BLOCK_SIZE; ++i) {
-		if(i == 0) prinf("<Super>\n");
+		if(i == 0) printf("<Super>\n");
 		if(i == I_BMAP_BASE) printf("<i-bmap>\n");
 		if(i == D_BMAP_BASE) printf("<d-bmap>\n");
 		if(i == I_BLOCK_BASE) printf("<i-block>\n");
 		if(i == D_BLOCK_BASE) printf("<d-block>\n");
+		if(i % 8 == 0) printf("\n %d : ", ++temp);
 		printf("%.2x ", *(data_storage + i));
 		if (i % BLOCK_NUM == BLOCK_NUM - 1) printf("\n\n");
 	}
@@ -347,6 +348,6 @@ int FindFile(char* file_name) {
 			return (root_entry + i)->inum;
 		}
 	}
-	//�ش� ���� ����
+	
 	return -1;
 }
