@@ -43,15 +43,15 @@ typedef struct {
 unsigned char* data_storage;
 
 int main(int argc, char* argv[]) {
-//	if (argc != 2) {
-//		printf("Error: the number of arguments.\n");
-//		return 1;
-//	}
+	if (argc != 2) {
+		printf("Error: the number of arguments.\n");
+		return 1;
+	}
 	
 	InitDataStorage();
 	InitRootDirectory();
 
-	FileSystem("input_file.txt");
+	FileSystem(argv[1]);
 	
 	free(data_storage);
 
@@ -125,7 +125,6 @@ void FileSystem(char* input_file_name) {
 	}
 	printf("\n");
 	
-	free(data_storage);
 	return;
 }
 /* inum -> */
@@ -180,7 +179,7 @@ void WriteFile(char* file_name, int word_size) {
 
 	return;
 }
-void ReadFile(char* file_name, unsigned int word_size) {
+void ReadFile(char* file_name, int word_size) {
 	int curr_ibmap_index = FindFile(file_name);
 	if (curr_ibmap_index == -1) {
 		printf("Error: File not found.\n");
@@ -343,6 +342,6 @@ int FindFile(char* file_name) {
 			return (root_entry + i)->inum;
 		}
 	}
-	//ÇØ´ç ÆÄÀÏ ¾øÀ½
+	//ï¿½Ø´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	return -1;
 }
