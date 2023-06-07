@@ -252,11 +252,9 @@ void DeleteFile(char* file_name) {
 	Inode* curr_inode = ((Inode*)(data_storage + I_BLOCK_BASE) + curr_ibmap_index);
 	if (curr_inode->iptr != 0) {
 		int* curr_iptr = (int*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * curr_inode->iptr);
-		printf("%d", *curr_iptr);
 		for (int i = 0; i < BLOCK_SIZE / 4; ++i) {
 			int dbmap_index = *(curr_iptr + i);
 			if (dbmap_index != 0) {
-				printf("\n!\n");
 				int byte_index = dbmap_index / 8;
 				int bit_index = dbmap_index % 8;
 				*(data_storage + D_BMAP_BASE + byte_index) &= ~(1 << (7 - bit_index));
@@ -330,10 +328,10 @@ int AllocateNewBlock() {
 	}
 
 	/* update dbmap */
-	unsigned char* dbmap = (data_storage + D_BMAP_BASE);
-	int byte_index = empty_block_index / 8;
-	int bit_index = empty_block_index % 8;
-	dbmap[byte_index] |= (1 << (7 - bit_index));
+	//unsigned char* dbmap = (data_storage + D_BMAP_BASE);
+	//int byte_index = empty_block_index / 8;
+	//int bit_index = empty_block_index % 8;
+	//dbmap[byte_index] |= (1 << (7 - bit_index));
 
 	return empty_block_index;
 }
