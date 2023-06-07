@@ -203,7 +203,7 @@ void ReadFile(char* file_name, int word_size) {
 		if (word_size <= 0 || curr_fsize <= 0) {
 			return;
 		}
-		printf("%c", curr_block[i]);
+		printf("%c", (char)curr_block[i]);
 		word_size--;
 		curr_fsize--;
 	}
@@ -214,7 +214,7 @@ void ReadFile(char* file_name, int word_size) {
 	// Read from multiple blocks pointed by iptr
 	int* pre_block = (int*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * curr_inode->iptr);
 	for (int i = 0; i < BLOCK_SIZE / 4; ++i) {
-		curr_block = data_storage + D_BLOCK_BASE + BLOCK_SIZE * (*(pre_block + i));
+		curr_block = (unsigned char*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * (pre_block + i)[0]);
 
 		for (int i = 0; i < BLOCK_SIZE; ++i) {
 			if (word_size <= 0 || curr_fsize <= 0) {
