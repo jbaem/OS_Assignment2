@@ -105,6 +105,7 @@ void FileSystem(char* input_file_name) {
 		case 'r': /* read */
 			fscanf(input_file, "%d", &word_size);
 			ReadFile(file_name, word_size);
+			printf("\n");
 			break;
 		case 'd': /* delete */
 			DeleteFile(file_name);
@@ -188,7 +189,7 @@ void WriteFile(char* file_name, int word_size) {
 void ReadFile(char* file_name, int word_size) {
 	int curr_ibmap_index = FindFile(file_name);
 	if (curr_ibmap_index == -1) {
-		printf("Error: File not found.\n");
+		printf("Error: File not found.");
 		return;
 	}
 
