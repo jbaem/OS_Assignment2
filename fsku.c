@@ -252,7 +252,7 @@ void DeleteFile(char* file_name) {
 	Inode* curr_inode = ((Inode*)(data_storage + I_BLOCK_BASE) + curr_ibmap_index);
 	if (curr_inode->iptr != 0) {
 		int* curr_iptr = (int*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * curr_inode->iptr);
-		
+		printf("%d", *curr_iptr);
 		for (int i = 0; i < BLOCK_SIZE / 4; ++i) {
 			int dbmap_index = *(curr_iptr + i);
 			if (dbmap_index != 0) {
