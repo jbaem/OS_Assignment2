@@ -72,10 +72,10 @@ void InitRootDirectory() {
 	/* ibmap 2 -> use */
 	*(data_storage + I_BMAP_BASE) += 32; //0010 0000
 	/* inode 2 -> update */
-	Inode* root_inode = ((Inode*)(data_storage + I_BLOCK_BASE) + 2);
-	root_inode->fsize = 4 * 61;
-	root_inode->blocks = 1;
-	root_inode->dptr = 0;
+	Inode* root_inode = ((Inode*)(data_storage + I_BLOCK_BASE));
+	root_inode->fsize = 4 * 61; // 1111 0100
+	root_inode->blocks = 1; //0000 0001
+	root_inode->dptr = 0; //0000 0000
 	/* dbmap 0 -> use */
 	*(data_storage + D_BMAP_BASE + root_inode->dptr) = 128;
 	/* dblock 0 -> empty(no entry) -> will be used */
