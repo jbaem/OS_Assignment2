@@ -254,12 +254,12 @@ void DeleteFile(char* file_name) {
 		int* curr_iptr = (int*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * curr_inode->iptr);
 
 		for (int i = 0; i < BLOCK_SIZE / 4; ++i) {
-			int dbmap_index = *(curr_iptr + i);
-			if (dbmap_index != 0) {
-				int byte_index = dbmap_index / 8;
-				int bit_index = dbmap_index % 8;
+			int* dbmap_index = ((int*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * curr_inode->iptr) + i);
+			if (*dbmap_index != 0) {
+				int byte_index = *dbmap_index / 8;
+				int bit_index = *dbmap_index % 8;
 				*(data_storage + D_BMAP_BASE + byte_index) &= ~(1 << (7 - bit_index));
-				memset(data_storage + D_BLOCK_BASE + BLOCK_SIZE * dbmap_index, 0, BLOCK_SIZE);
+				memset(data_storage + D_BLOCK_BASE + BLOCK_SIZE * *dbmap_index, 0, BLOCK_SIZE);
 			}
 		}
 		//dbmap에서 iptr 값 삭제
