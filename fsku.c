@@ -282,12 +282,12 @@ int CreateFile(char* file_name) {
 	}
 
 	/* update entry */
-	DirectoryEntry* entry = (DirectoryEntry*)(data_storage + D_BLOCK_BASE)[empty_entry_index];
-	entry->inum = empty_entry_index + 2;
+	DirectoryEntry* entry = ((DirectoryEntry*)(data_storage + D_BLOCK_BASE) + empty_entry_index);
+	entry->inum = empty_entry_index + 3;
 	strncpy(entry->fileName, file_name, 3);
 	
 	/* allocate inode */
-	int inode_index = empty_entry_index + 2;
+	int inode_index = empty_entry_index + 3;
 	Inode* inode = ((Inode*)(data_storage + I_BLOCK_BASE) + inode_index);
 	inode->fsize = 0;
 	inode->blocks = 0;
