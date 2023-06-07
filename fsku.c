@@ -134,7 +134,6 @@ void FileSystem(char* input_file_name) {
 }
 /* inum -> */
 void WriteFile(char* file_name, int word_size) {
-
 	/* search file */
 	int curr_inode_index = FindFile(file_name);
 	/* file -> not exist */
@@ -273,7 +272,6 @@ void DeleteFile(char* file_name) {
 
 	printf("File '%s' deleted.\n", file_name);
 }
-
 /* */
 int CreateFile(char* file_name) {
 	/* find empty entry */
@@ -284,7 +282,7 @@ int CreateFile(char* file_name) {
 	}
 
 	/* update entry */
-	DirectoryEntry* entry = ((DirectoryEntry*)(data_storage + D_BLOCK_BASE) + empty_entry_index);
+	DirectoryEntry* entry = (DirectoryEntry*)(data_storage + D_BLOCK_BASE)[empty_entry_index];
 	entry->inum = empty_entry_index + 2;
 	strncpy(entry->fileName, file_name, 3);
 	
@@ -315,7 +313,6 @@ int AllocateNewBlock() {
 
 	return empty_block_index;
 }
-
 /* find empty entry & return entry index */
 int FindEmptySpace() {
 	/* root_inode */
