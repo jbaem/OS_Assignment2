@@ -256,6 +256,7 @@ void DeleteFile(char* file_name) {
 		for (int i = 0; i < BLOCK_SIZE / 4; ++i) {
 			int dbmap_index = *(curr_iptr + i);
 			if (dbmap_index != 0) {
+				printf("\n!\n");
 				int byte_index = dbmap_index / 8;
 				int bit_index = dbmap_index % 8;
 				*(data_storage + D_BMAP_BASE + byte_index) &= ~(1 << (7 - bit_index));
