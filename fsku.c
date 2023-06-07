@@ -120,6 +120,11 @@ void FileSystem(char* input_file_name) {
 	fclose(input_file);
 
 	for (int i = 0; i < BLOCK_NUM * BLOCK_SIZE; ++i) {
+		if(i == 0) prinf("<Super>\n");
+		if(i == I_BMAP_BASE) printf("<i-bmap>\n");
+		if(i == D_BMAP_BASE) printf("<d-bmap>\n");
+		if(i == I_BLOCK_BASE) printf("<i-block>\n");
+		if(i == D_BLOCK_BASE) printf("<d-block>\n");
 		printf("%.2x ", *(data_storage + i));
 		if (i % BLOCK_NUM == BLOCK_NUM - 1) printf("\n\n");
 	}
