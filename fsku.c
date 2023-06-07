@@ -125,7 +125,7 @@ void FileSystem(char* input_file_name) {
 		if(i == I_BLOCK_BASE) printf("<i-block>\n");			//TODO: erase
 		if(i == D_BLOCK_BASE) printf("<d-block>\n");			//TODO: erase
 		if(i % 8 == 0) printf("\n %d : ", ++temp);				//TODO: erase
-		printf("%c ", *(data_storage + i));
+		printf("%.2x ", *(data_storage + i));
 		if (i % BLOCK_NUM == BLOCK_NUM - 1) printf("\n\n");		//TODO: erase
 	}
 	printf("\n");
@@ -220,7 +220,7 @@ void ReadFile(char* file_name, int word_size) {
 			if (word_size <= 0 || curr_fsize <= 0) {
 				return;
 			}
-			printf("%c", curr_block[i]); //TODO: update
+			printf("%c", (char)curr_block[i]); //TODO: update
 			word_size--;
 			curr_fsize--;
 		}
