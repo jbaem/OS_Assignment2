@@ -177,7 +177,7 @@ void WriteFile(char* file_name, int word_size) {
 					return;
 				}
 			}
-			int block_index = *((int*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * curr_inode->iptr) + curr_inode->blocks - 2);
+			int block_index = *((int*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * curr_inode->iptr) + curr_inode->blocks - 1);
 			if (block_index == 0) {
 				block_index = AllocateNewBlock();
 				if (block_index == -1) {
@@ -185,7 +185,7 @@ void WriteFile(char* file_name, int word_size) {
 					printf("No space\n");
 					return;
 				}
-				*((int*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * curr_inode->iptr) + curr_inode->blocks - 2) = block_index;
+				*((int*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * curr_inode->iptr) + curr_inode->blocks - 1) = block_index;
 				curr_inode->blocks += 1;
 			}
 			write_index = (unsigned char*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * block_index);
@@ -328,10 +328,10 @@ int AllocateNewBlock() {
 	}
 
 	/* update dbmap */
-	//unsigned char* dbmap = (data_storage + D_BMAP_BASE);
-	//int byte_index = empty_block_index / 8;
-	//int bit_index = empty_block_index % 8;
-	//dbmap[byte_index] |= (1 << (7 - bit_index));
+	unsigned char* dbmap = (data_storage + D_BMAP_BASE);
+	int byte_index = empty_block_index / 8;
+	int bit_index = empty_block_index % 8;
+	dbmap[byte_index] |= (1 << (7 - bit_index));
 
 	return empty_block_index;
 }
