@@ -26,8 +26,6 @@ int AllocateNewBlock();
 int FindEmptySpace();
 int FindFile(char*);
 
-
-
 typedef struct {
 	unsigned int fsize;
 	unsigned int blocks;
@@ -66,7 +64,7 @@ void InitDataStorage() {
 	/* ibmap 0,1 -> use */
 	*(data_storage + I_BMAP_BASE) = 192; //1100 0000
 	return;
-	/* inode 0,1 -> empty */
+	/* inode 0,1 -> empty(not use) */
 
 }
 /* i=2, d=0 */
@@ -80,7 +78,7 @@ void InitRootDirectory() {
 	root_inode->dptr = 0;
 	/* dbmap 0 -> use */
 	*(data_storage + D_BMAP_BASE + root_inode->dptr) = 128;
-	/* dblock 0 -> empty(no entry) */
+	/* dblock 0 -> empty(no entry) -> will be used */
 
 }
 /* open -> read lines <-> command -> EOF -> close */
@@ -118,16 +116,16 @@ void FileSystem(char* input_file_name) {
 	
 	/* EOF -> all bits in hexadecimal */
 	fclose(input_file);
-	int temp = 0;
+	int temp = 0; //TODO: erase
 	for (int i = 0; i < BLOCK_NUM * BLOCK_SIZE; ++i) {
-		if(i == 0) printf("<Super>\n");
-		if(i == I_BMAP_BASE) printf("<i-bmap>\n");
-		if(i == D_BMAP_BASE) printf("<d-bmap>\n");
-		if(i == I_BLOCK_BASE) printf("<i-block>\n");
-		if(i == D_BLOCK_BASE) printf("<d-block>\n");
-		if(i % 8 == 0) printf("\n %d : ", ++temp);
+		if(i == 0) printf("<Super>\n");							//TODO: erase
+		if(i == I_BMAP_BASE) printf("<i-bmap>\n");				//TODO: erase
+		if(i == D_BMAP_BASE) printf("<d-bmap>\n");				//TODO: erase
+		if(i == I_BLOCK_BASE) printf("<i-block>\n");			//TODO: erase
+		if(i == D_BLOCK_BASE) printf("<d-block>\n");			//TODO: erase
+		if(i % 8 == 0) printf("\n %d : ", ++temp);				//TODO: erase
 		printf("%.2x ", *(data_storage + i));
-		if (i % BLOCK_NUM == BLOCK_NUM - 1) printf("\n\n");
+		if (i % BLOCK_NUM == BLOCK_NUM - 1) printf("\n\n");		//TODO: erase
 	}
 	printf("\n");
 	
@@ -143,6 +141,7 @@ void WriteFile(char* file_name, int word_size) {
 		curr_inode_index = CreateFile(file_name);
 		/* no space */
 		if (curr_inode_index == -1) {
+			printf("No space\n");
 			return;
 		}
 	}
@@ -170,6 +169,7 @@ void WriteFile(char* file_name, int word_size) {
 			block_index = AllocateNewBlock();
 			if (block_index == -1) {
 				/* no space */
+				printf("No space\n");
 				return;
 			}
 		}
@@ -219,7 +219,7 @@ void ReadFile(char* file_name, int word_size) {
 			if (word_size <= 0 || curr_fsize <= 0) {
 				return;
 			}
-			printf("%c", *(curr_block + i));
+			printf("%c", curr_block + i); //TODO: update
 			word_size--;
 			curr_fsize--;
 		}
@@ -348,6 +348,6 @@ int FindFile(char* file_name) {
 			return (root_entry + i)->inum;
 		}
 	}
-	
+
 	return -1;
 }
