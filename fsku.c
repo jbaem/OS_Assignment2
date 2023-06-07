@@ -203,7 +203,7 @@ void ReadFile(char* file_name, int word_size) {
 		if (word_size <= 0 || curr_fsize <= 0) {
 			return;
 		}
-		printf("%c", *(curr_block + i));
+		printf("%c", curr_block[i]);
 		word_size--;
 		curr_fsize--;
 	}
