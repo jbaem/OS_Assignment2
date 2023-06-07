@@ -8,20 +8,20 @@
 #define ENTRY_SIZE 4
 
 #define I_BMAP_BASE 512
-#define D_BMAP_BASE 512 + 256
+#define D_BMAP_BASE (512 + 256)
 #define I_BLOCK_BASE 1024
 #define D_BLOCK_BASE 2048
 
 void InitDataStorage();
 void InitRootDirectory();
 
-void FileSystem(char*);
+void FileSystem(char* input_file_name);
 
-void ReadFile(char*, int);
-void WriteFile(char*, int);
-void DeleteFile(char*);
+void ReadFile(char* file_name, int word_size);
+void WriteFile(char* file_name, int word_size);
+void DeleteFile(char* file_name);
 
-int CreateFile(char*);
+int CreateFile(char* file_name);
 int AllocateNewBlock();
 int FindEmptySpace();
 int FindFile(char*);
@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
 /* super, i=0,1 */
 void InitDataStorage() {
 	/* allocate storage */
-	data_storage = (char*)calloc(BLOCK_NUM, BLOCK_SIZE);
+	data_storage = calloc(BLOCK_NUM, BLOCK_SIZE);
 	/* super -> empty */
 
 	/* ibmap 0,1 -> use */
@@ -112,7 +112,7 @@ void FileSystem(char* input_file_name) {
 			DeleteFile(file_name);
 			break;
 		default: /* else */
-			printf("");
+			printf("Error: invalid command\n");
 		}
 	}
 	
@@ -178,26 +178,21 @@ void WriteFile(char* file_name, int word_size) {
 		word_size--;
 	}
 
-	WriteFile(file_name, word_size);
 	return;
 }
-/**/
 void ReadFile(char* file_name, unsigned int word_size) {
-	//비트맵 접근
 	int curr_ibmap_index = FindFile(file_name);
-	//파일 없음
 	if (curr_ibmap_index == -1) {
-		printf("No such file");
+		printf("Error: File not found.\n");
 		return;
 	}
-	//아이 블럭 접근
+
 	Inode* curr_inode = ((Inode*)(data_storage + I_BLOCK_BASE) + curr_ibmap_index);
 
-	//데이터 블러 접근
-	int curr_fsize = curr_inode->fsize;
-	char* curr_block = data_storage + D_BLOCK_BASE + BLOCK_SIZE * curr_inode->dptr;
+	unsigned int curr_fsize = curr_inode->fsize;
+	unsigned char* curr_block = data_storage + D_BLOCK_BASE + BLOCK_SIZE * curr_inode->dptr;
 
-	//한개의 블럭. dptr로 접근
+	// Read from a single block pointed by dptr
 	for (int i = 0; i < BLOCK_SIZE; ++i) {
 		if (word_size <= 0 || curr_fsize <= 0) {
 			return;
@@ -207,10 +202,10 @@ void ReadFile(char* file_name, unsigned int word_size) {
 		curr_fsize--;
 	}
 	if (curr_inode->blocks == 1) {
-		return; //다른 블럭이 할당되지 않음
+		return; // No additional blocks allocated
 	}
 
-	//여러 개의 블럭. iptr로 접근, word_size, curr_fsize 가 아직 남아 있음.
+	// Read from multiple blocks pointed by iptr
 	int* pre_block = (int*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * curr_inode->iptr);
 	for (int i = 0; i < BLOCK_SIZE / 4; ++i) {
 		curr_block = data_storage + D_BLOCK_BASE + BLOCK_SIZE * (*(pre_block + i));
@@ -224,56 +219,95 @@ void ReadFile(char* file_name, unsigned int word_size) {
 			curr_fsize--;
 		}
 	}
-	return;
 }
 
-/**/
 void DeleteFile(char* file_name) {
-	
 	int curr_ibmap_index = FindFile(file_name);
 	if (curr_ibmap_index == -1) {
-		printf("No such file\n");
+		printf("Error: File not found.\n");
 		return;
 	}
+
+	// Update inode and directory entry
+	Inode* curr_inode = ((Inode*)(data_storage + I_BLOCK_BASE) + curr_ibmap_index);
+	curr_inode->fsize = 0;
+	curr_inode->blocks = 0;
+	curr_inode->dptr = 0;
+	curr_inode->iptr = 0;
+
+	DirectoryEntry* entry = ((DirectoryEntry*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * 0)); // Assuming root directory is at inode 0
+
+	// Find the corresponding entry and mark it as unused
+	for (int i = 0; i < BLOCK_SIZE / ENTRY_SIZE; ++i) {
+		if ((entry + i)->inum == curr_ibmap_index + 2) {
+			(entry + i)->inum = 0;
+			break;
+		}
+	}
+
+	// Clear block bitmap
+	unsigned char* dbmap = (data_storage + D_BMAP_BASE);
+	int block_byte_index = curr_inode->dptr / 8;
+	int block_bit_index = curr_inode->dptr % 8;
+	dbmap[block_byte_index] &= ~(1 << (7 - block_bit_index));
+
+	// Clear indirect block bitmap
+	if (curr_inode->blocks > 1) {
+		int* pre_block = (int*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * curr_inode->iptr);
+		for (int i = 0; i < BLOCK_SIZE / 4; ++i) {
+			int indirect_block = *(pre_block + i);
+			if (indirect_block == 0) {
+				break;
+			}
+			int ind_block_byte_index = indirect_block / 8;
+			int ind_block_bit_index = indirect_block % 8;
+			dbmap[ind_block_byte_index] &= ~(1 << (7 - ind_block_bit_index));
+		}
+	}
+
+	printf("File '%s' deleted.\n", file_name);
 }
+
 /* */
 int CreateFile(char* file_name) {
-	//공간이 없다
-	//반환값이 엔트리 인덱스
-	int entry_index = FindEmptySpace();
-	if (entry_index == -1) {
-		printf("No space\n");
+	/* find empty entry */
+	int empty_entry_index = FindEmptySpace();
+	if (empty_entry_index == -1) {
+		/* no space */
 		return -1;
 	}
 
-	//공간이 있다
-	//ibmap 인덱스를 찾아
-	int create_inode_index = 0;
-	for (int i = 0; BLOCK_SIZE / 2; ++i) {
-		if ((char*)(data_storage + I_BMAP_BASE + i) == 0x01) continue;
-		create_inode_index = i;
-		*(data_storage + I_BMAP_BASE + i) = 0x01;
-		break;
-	}
+	/* update entry */
+	DirectoryEntry* entry = ((DirectoryEntry*)(data_storage + D_BLOCK_BASE) + empty_entry_index);
+	entry->inum = empty_entry_index + 2;
+	strncpy(entry->fileName, file_name, 3);
+	
+	/* allocate inode */
+	int inode_index = empty_entry_index + 2;
+	Inode* inode = ((Inode*)(data_storage + I_BLOCK_BASE) + inode_index);
+	inode->fsize = 0;
+	inode->blocks = 0;
+	inode->dptr = 0;
+	inode->iptr = 0;
 
-	//dbmap 인덱스를 찾아
-	int create_block_index = 0;
-	for (int i = 0; BLOCK_SIZE / 2; ++i) {
-		if (*(data_storage + D_BMAP_BASE + i) == 0x01) continue;
-		create_block_index = i;
-		*(data_storage + D_BMAP_BASE + i) = 0x01;
-		break;
-	}
-
-	//inode를 연결
-	Inode* curr_inode = ((Inode*)(data_storage + I_BLOCK_BASE) + create_inode_index);
-	curr_inode->blocks = 0;
-	curr_inode->dptr = create_inode_index;
-
-	return create_inode_index;
+	return inode_index;
 }
+/* */
 int AllocateNewBlock() {
+	/* find empty block */
+	int empty_block_index = FindEmptySpace();
+	if (empty_block_index == -1) {
+		/* no space */
+		return -1;
+	}
 
+	/* update dbmap */
+	unsigned char* dbmap = (data_storage + D_BMAP_BASE);
+	int byte_index = empty_block_index / 8;
+	int bit_index = empty_block_index % 8;
+	dbmap[byte_index] |= (1 << (7 - bit_index));
+
+	return empty_block_index;
 }
 
 /* find empty entry & return entry index */
