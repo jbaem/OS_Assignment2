@@ -199,6 +199,7 @@ void WriteFile(char* file_name, int word_size) {
 			word_size--;
 			fsize++;
 		}
+		
 		printf("5\n");
 	}
 
@@ -371,7 +372,7 @@ int FindDBmap() {
 	int dbmap_index = 0;
 	//base
 	unsigned char* curr_dbmap = data_storage + D_BMAP_BASE;
-	for (int i = 0; i < 60; ++i) {
+	for (int i = 0; i < 57; ++i) {
 		unsigned char curr = *(curr_dbmap + i);
 
 		if (curr != 0xFF) {
