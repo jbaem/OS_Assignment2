@@ -328,6 +328,7 @@ int AllocateNewBlock() {
 	//empty dbmap index
 	int empty_block_index = FindDBmap();
 	if (empty_block_index == -1) {
+		printf("creaete");
 		return -1;
 	}
 	
@@ -386,6 +387,5 @@ int FindDBmap() {
 		}
 		dbmap_index += 8;
 	}
-	printf("creaete~!~");
 	return -1;
 }
