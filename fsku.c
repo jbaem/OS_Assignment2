@@ -92,8 +92,7 @@ void FileSystem(char* input_file_name) {
 	unsigned int word_size;
 	int rc;
 	int line = 0;
-	while ((rc = fscanf(input_file, "%c%c %c", file_name[0], file_name[1], &io_command)) != EOF) {
-		file_name[2] = '\0';
+	while ((rc = fscanf(input_file, "%s %c", file_name, &io_command)) != EOF) {
 		/*
 		int temp = 0; //TODO: erase
 		for (int i = 0; i < BLOCK_NUM * BLOCK_SIZE; ++i) {
