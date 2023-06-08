@@ -173,6 +173,7 @@ void WriteFile(char* file_name, int word_size) {
 			int block_index = *((int*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * curr_inode->iptr) + curr_inode->blocks - 2);
 			if (block_index == 0) {
 				block_index = AllocateNewBlock();
+				printf("\n%d\n", block_index);
 				if (block_index == -1) {
 					/* no space */
 					printf("No space\n");
