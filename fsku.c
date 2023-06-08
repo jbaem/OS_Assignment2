@@ -383,7 +383,9 @@ int FindDBmap() {
 				}
 			}
 		}
-		dbmap_index += 8;
+		else {
+			dbmap_index += 8;
+		}
 	}
 
 	return -1;
