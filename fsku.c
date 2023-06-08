@@ -93,6 +93,20 @@ void FileSystem(char* input_file_name) {
 	int rc;
 	int line = 0;
 	while ((rc = fscanf(input_file, "%s %c", file_name, &io_command)) != EOF) {
+		int temp = 0; //TODO: erase
+		for (int i = 0; i < BLOCK_NUM * BLOCK_SIZE; ++i) {
+			if (i == 0) printf("<Super>\n");							//TODO: erase
+			if (i == I_BMAP_BASE) printf("<i-bmap>\n");				//TODO: erase
+			if (i == D_BMAP_BASE) printf("<d-bmap>\n");				//TODO: erase
+			if (i == I_BLOCK_BASE) printf("<i-block>\n");			//TODO: erase
+			if (i == D_BLOCK_BASE) printf("<d-block>\n");			//TODO: erase
+			if (i % BLOCK_SIZE == 0) printf(">%d th block\n", i / BLOCK_SIZE);
+			if (i % 8 == 0) printf("\n %d : ", ++temp);				//TODO: erase
+			printf("%02x ", *(data_storage + i));
+			if (i % BLOCK_NUM == BLOCK_NUM - 1) printf("\n\n");		//TODO: erase
+		}
+		printf("\n");
+		
 		printf("%d: %c\n", ++line, io_command);
 		switch (io_command) {
 		case 'w':
