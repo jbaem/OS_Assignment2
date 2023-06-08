@@ -371,7 +371,7 @@ int FindDBmap() {
 	//byte
 	int dbmap_index = 0;
 	//base
-	unsigned char* curr_dbmap = data_storage + D_BMAP_BASE;
+	unsigned char* curr_dbmap = (unsigned char*)(data_storage + D_BMAP_BASE);
 	for (int i = 0; i < 8; ++i) {
 		unsigned char curr = *(curr_dbmap + i);
 
@@ -386,6 +386,7 @@ int FindDBmap() {
 		}
 		else {
 			dbmap_index += 8;
+			i--;
 		}
 	}
 
