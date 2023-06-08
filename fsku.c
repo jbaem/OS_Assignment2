@@ -387,6 +387,6 @@ int FindDBmap() {
 		}
 		dbmap_index += 8;
 	}
-	printf("creaete?!?");
+	printf("creaete~!~");
 	return -1;
 }
