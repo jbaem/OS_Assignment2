@@ -26,6 +26,7 @@ int AllocateNewBlock();
 int FindEmptySpace();
 int FindFile(char*);
 int FindDBmap();
+void SetBitMap(int base, int index, char flag);
 
 typedef struct {
 	unsigned int fsize;
@@ -42,15 +43,16 @@ typedef struct {
 unsigned char* data_storage;
 
 int main(int argc, char* argv[]) {
-	if (argc != 2) {
-		printf("Error: the number of arguments.\n");
-		return 1;
-	}
+//TODO: change comments
+//	if (argc != 2) {
+//		printf("Error: the number of arguments.\n");
+//		return 1;
+//	}
 
 	InitDataStorage();
 	InitRootDirectory();
 
-	FileSystem(argv[1]); //TODO: change argument
+	FileSystem("input_file.txt"); //TODO: change argument
 
 	free(data_storage);
 
@@ -61,9 +63,10 @@ void InitDataStorage() {
 	/* allocate storage */
 	data_storage = calloc(BLOCK_NUM, BLOCK_SIZE);
 	/* super -> empty */
-
-	/* ibmap 0,1 -> use */
-	*(data_storage + I_BMAP_BASE) = 192; //1100 0000
+	if (data_storage != NULL) {
+		/* ibmap 0,1 -> use */
+		*(data_storage + I_BMAP_BASE) = 192; //1100 0000
+	}
 	return;
 	/* inode 0,1 -> empty(not use) */
 
@@ -97,14 +100,14 @@ void FileSystem(char* input_file_name) {
 	unsigned int word_size;
 	int rc;
 	while ((rc = fscanf(input_file, "%s %c", file_name, &io_command)) != EOF) {
-
+		printf("%c\n", io_command);
 		switch (io_command) {
 		case 'w': /* write */
-			fscanf(input_file, "%d", &word_size);
+			rc = fscanf(input_file, "%d", &word_size);
 			WriteFile(file_name, word_size);
 			break;
 		case 'r': /* read */
-			fscanf(input_file, "%d", &word_size);
+			rc = fscanf(input_file, "%d", &word_size);
 			ReadFile(file_name, word_size);
 			printf("\n");
 			break;
@@ -162,23 +165,12 @@ void WriteFile(char* file_name, int word_size) {
 	unsigned char* write_index;
 
 	while (word_size > 0) {
-		if (curr_inode->blocks == 0 || curr_inode->fsize < BLOCK_SIZE) {
+		if (curr_inode->fsize < BLOCK_SIZE) {
 			/* dptr */
 			write_index = (unsigned char*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * curr_inode->dptr + curr_block_fsize);
-			if (curr_inode->blocks == 0) {
-				curr_inode->blocks++;
-			}
 		}
-		else {
-			/* iptr */
-			if (curr_inode->iptr == 0) {
-				curr_inode->iptr = FindDBmap();
-				if (curr_inode->iptr == -1) {
-					printf("No space\n");
-					return;
-				}
-			}
-			int block_index = *((int*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * curr_inode->iptr) + curr_inode->blocks - 1);
+		else if (curr_inode->fsize % BLOCK_SIZE == 0) {
+			int block_index = *((int*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * curr_inode->iptr) + curr_inode->blocks - 2);
 			if (block_index == 0) {
 				block_index = AllocateNewBlock();
 				if (block_index == -1) {
@@ -186,9 +178,14 @@ void WriteFile(char* file_name, int word_size) {
 					printf("No space\n");
 					return;
 				}
-				*((int*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * curr_inode->iptr) + curr_inode->blocks - 1) = block_index;
+				*((int*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * curr_inode->iptr) + curr_inode->blocks - 2) = block_index;
 				curr_inode->blocks += 1;
 			}
+			write_index = (unsigned char*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * block_index);
+		}
+		else {
+			/* iptr */
+			int block_index = *((int*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * curr_inode->iptr) + curr_inode->blocks - 3);
 			write_index = (unsigned char*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * block_index);
 		}
 		int fsize = curr_inode->fsize % BLOCK_SIZE;
@@ -224,13 +221,10 @@ void ReadFile(char* file_name, int word_size) {
 		word_size--;
 		curr_fsize--;
 	}
-	if (curr_inode->blocks == 1) {
-		return; // No additional blocks allocated
-	}
 
 	// Read from multiple blocks pointed by iptr
 	int* pre_block = (int*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * curr_inode->iptr);
-	for (int i = 0; i < BLOCK_SIZE / 4; ++i) {
+	for (int i = 0; i < curr_inode->blocks - 1; ++i) {
 		curr_block = (unsigned char*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * (pre_block + i)[0]);
 
 		for (int i = 0; i < BLOCK_SIZE; ++i) {
@@ -253,46 +247,40 @@ void DeleteFile(char* file_name) {
 	Inode* curr_inode = ((Inode*)(data_storage + I_BLOCK_BASE) + curr_ibmap_index);
 	if (curr_inode->iptr != 0) {
 		int* curr_iptr = (int*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * curr_inode->iptr);
-		for (int i = 0; i < BLOCK_SIZE / 4; ++i) {
+		for (int i = 0; i < curr_inode->blocks - 1; ++i) {
 			int dbmap_index = *(curr_iptr + i);
 			if (dbmap_index != 0) {
 				//TODO: 함수로 빼기
 				int byte_index = dbmap_index / 8;
 				int bit_index = dbmap_index % 8;
 				*(data_storage + D_BMAP_BASE + byte_index) &= ~(1 << (7 - bit_index));
-				memset(data_storage + D_BLOCK_BASE + BLOCK_SIZE * dbmap_index, 0, BLOCK_SIZE);
 			}
 		}
 		//dbmap에서 iptr 값 삭제
-		int byte_index = curr_inode->iptr / 8;
-		int bit_index = curr_inode->iptr % 8;
-		*(data_storage + D_BMAP_BASE + byte_index) &= ~(1 << (7 - bit_index));
-		memset(data_storage + D_BLOCK_BASE + BLOCK_SIZE * curr_inode->iptr, 0, BLOCK_SIZE);
+		SetBitMap(D_BMAP_BASE, curr_inode->iptr, 'n');
 	}
 	//dbmap에서 dptr 값 삭제
-	int byte_index = curr_inode->dptr / 8;
-	int bit_index = curr_inode->dptr % 8;
-	*(data_storage + D_BMAP_BASE + byte_index) &= ~(1 << (7 - bit_index));
-	memset(data_storage + D_BLOCK_BASE + BLOCK_SIZE * curr_inode->dptr, 0, BLOCK_SIZE);
-
-	curr_inode->fsize = 0;
-	curr_inode->dptr = 0;
-	curr_inode->blocks = 0;
-	curr_inode->iptr = 0;
-
+	SetBitMap(D_BMAP_BASE, curr_inode->dptr, 'n');
+	
 	//ibmap에서 inum에 해당 하는 값 삭제
 	DirectoryEntry* dir_entry = ((DirectoryEntry*)(data_storage + D_BLOCK_BASE) + curr_ibmap_index - 3);
-
-	byte_index = dir_entry->inum / 8;
-	bit_index = dir_entry->inum % 8;
-	*(data_storage + I_BMAP_BASE + byte_index) &= ~(1 << (7 - bit_index));
+	SetBitMap(I_BMAP_BASE, dir_entry->inum, 'n');
 	
 	//inum = 0 으로 만들어
 	dir_entry->inum = 0;
-	dir_entry->fileName[0] = 0;
-	dir_entry->fileName[1] = 0;
 }
 /* */
+void SetBitMap(int base, int index, char flag) {
+	int byte_index = index / 8;
+	int bit_index = index % 8;
+	if (flag == 'a') {
+		*(data_storage + base + byte_index) |= (1 << (7 - bit_index));
+	}
+	else {
+		*(data_storage + base + byte_index) &= ~(1 << (7 - bit_index));
+	}
+}
+
 int CreateFile(char* file_name) {
 	/* find empty entry */
 	int empty_entry_index = FindEmptySpace();
@@ -310,14 +298,15 @@ int CreateFile(char* file_name) {
 	int inode_index = empty_entry_index + 3;
 	Inode* inode = ((Inode*)(data_storage + I_BLOCK_BASE) + inode_index);
 	inode->fsize = 0;
-	inode->blocks = 0;
+	inode->blocks = 2;
 	inode->dptr = FindDBmap();
-	inode->iptr = 0;
+	inode->iptr = AllocateNewBlock();
 
-	int byte_index = inode_index / 8;
-	int bit_index = inode_index % 8;
-	*(data_storage + I_BMAP_BASE + byte_index) |= (1 << (7 - bit_index));
-
+	if (inode->dptr == -1 || inode->iptr == -1) {
+		return -1;
+	}
+	SetBitMap(I_BMAP_BASE, inode_index, 'a');
+	
 	return inode_index;
 }
 /* */
@@ -328,12 +317,9 @@ int AllocateNewBlock() {
 		/* no space */
 		return -1;
 	}
-
+	memset(data_storage + D_BLOCK_BASE + BLOCK_SIZE * empty_block_index, 0, BLOCK_SIZE);
 	/* update dbmap */
-	unsigned char* dbmap = (data_storage + D_BMAP_BASE);
-	int byte_index = empty_block_index / 8;
-	int bit_index = empty_block_index % 8;
-	dbmap[byte_index] |= (1 << (7 - bit_index));
+	SetBitMap(D_BMAP_BASE, empty_block_index, 'a');
 
 	return empty_block_index;
 }
