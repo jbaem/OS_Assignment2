@@ -109,7 +109,7 @@ void FileSystem(char* input_file_name) {
 		}
 		printf("\n");
 		*/
-		
+		printf("asd");
 		switch (io_command) {
 		case 'w':
 			fscanf(input_file, "%d", &word_size);
