@@ -149,13 +149,12 @@ void WriteFile(char* file_name, int word_size) {
 	//inode for write
 	Inode* write_inode = ((Inode*)(data_storage + I_BLOCK_BASE) + inum);
 	
-	//offset
-	int fsize = write_inode->fsize % BLOCK_SIZE;
-
 	//block for write and 
 	unsigned char* write_index;
 	while (word_size > 0) {
-		
+		//offset
+		int fsize = write_inode->fsize % BLOCK_SIZE;
+	
 		if (write_inode->fsize < BLOCK_SIZE) {
 			write_index = (unsigned char*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * write_inode->dptr + fsize);
 			printf("1\n");
