@@ -293,6 +293,7 @@ void SetBitMap(int base, int index, char flag) {
 
 int CreateFile(char* file_name) {
 	//empty index
+	printf("creaete");
 	int empty_entry_index = FindEmptySpace();
 	if (empty_entry_index == -1) {
 		return -1;
