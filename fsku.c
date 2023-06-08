@@ -328,7 +328,6 @@ int AllocateNewBlock() {
 	//empty dbmap index
 	int empty_block_index = FindDBmap();
 	if (empty_block_index == -1) {
-		printf("creaete");
 		return -1;
 	}
 	
@@ -373,7 +372,7 @@ int FindDBmap() {
 	//base
 	unsigned char* curr_dbmap = (unsigned char*)(data_storage + D_BMAP_BASE);
 	for (int i = 0; i < 8; ++i) {
-		unsigned char curr = *(curr_dbmap + i);
+		unsigned char curr = curr_dbmap[i];
 
 		if (curr != 0xFF) {
 			//bit
@@ -387,6 +386,5 @@ int FindDBmap() {
 		}
 		dbmap_index += 8;
 	}
-	printf("creaete~!~");
 	return -1;
 }
