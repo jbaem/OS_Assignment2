@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
 	InitDataStorage();
 	InitRootDirectory();
 
-	FileSystem(argv[1]);
+	FileSystem(argv[1]); //TODO: change argument
 
 	free(data_storage);
 
@@ -125,6 +125,7 @@ void FileSystem(char* input_file_name) {
 		if (i == D_BMAP_BASE) printf("<d-bmap>\n");				//TODO: erase
 		if (i == I_BLOCK_BASE) printf("<i-block>\n");			//TODO: erase
 		if (i == D_BLOCK_BASE) printf("<d-block>\n");			//TODO: erase
+		if (i % BLOCK_SIZE == 0) printf(">%d th block\n", i / BLOCK_SIZE);
 		if (i % 8 == 0) printf("\n %d : ", ++temp);				//TODO: erase
 		printf("%02x ", *(data_storage + i));
 		if (i % BLOCK_NUM == BLOCK_NUM - 1) printf("\n\n");		//TODO: erase
@@ -159,7 +160,7 @@ void WriteFile(char* file_name, int word_size) {
 	unsigned int curr_block_fsize = curr_inode->fsize % BLOCK_SIZE;
 
 	unsigned char* write_index;
-	
+
 	while (word_size > 0) {
 		if (curr_inode->blocks == 0 || curr_inode->fsize < BLOCK_SIZE) {
 			/* dptr */
@@ -191,7 +192,7 @@ void WriteFile(char* file_name, int word_size) {
 			write_index = (unsigned char*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * block_index);
 		}
 		int fsize = curr_inode->fsize % BLOCK_SIZE;
-		
+
 		while (fsize + 1 <= BLOCK_SIZE && word_size > 0) {
 			*(write_index) = letter;
 			write_index++;
@@ -255,6 +256,7 @@ void DeleteFile(char* file_name) {
 		for (int i = 0; i < BLOCK_SIZE / 4; ++i) {
 			int dbmap_index = *(curr_iptr + i);
 			if (dbmap_index != 0) {
+				//TODO: 함수로 빼기
 				int byte_index = dbmap_index / 8;
 				int bit_index = dbmap_index % 8;
 				*(data_storage + D_BMAP_BASE + byte_index) &= ~(1 << (7 - bit_index));
@@ -284,7 +286,7 @@ void DeleteFile(char* file_name) {
 	byte_index = dir_entry->inum / 8;
 	bit_index = dir_entry->inum % 8;
 	*(data_storage + I_BMAP_BASE + byte_index) &= ~(1 << (7 - bit_index));
-
+	
 	//inum = 0 으로 만들어
 	dir_entry->inum = 0;
 	dir_entry->fileName[0] = 0;
