@@ -146,6 +146,7 @@ void FileSystem(char* input_file_name) {
 }
 
 void WriteFile(char* file_name, int word_size) {
+	printf("0\n");
 	//inum in entry
 	int inum = FindFile(file_name);
 	if (inum == -1) {
@@ -156,7 +157,6 @@ void WriteFile(char* file_name, int word_size) {
 			return;
 		}
 	}
-
 	if (word_size == 0) {
 		return;
 	}
@@ -383,9 +383,7 @@ int FindDBmap() {
 				}
 			}
 		}
-		else {
-			dbmap_index += 8;
-		}
+		dbmap_index += 8;
 	}
 
 	return -1;
