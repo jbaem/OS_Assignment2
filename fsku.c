@@ -321,7 +321,7 @@ int CreateFile(char* file_name) {
 	if (inode->dptr == -1 || inode->iptr == -1) {
 		return -1;
 	}
-
+	printf("there");
 	SetBitMap(I_BMAP_BASE, inode_index, 'a');
 	
 	return inode_index;
