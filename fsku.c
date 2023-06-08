@@ -93,6 +93,7 @@ void FileSystem(char* input_file_name) {
 	int rc;
 	int line = 0;
 	while ((rc = fscanf(input_file, "%s %c", file_name, &io_command)) != EOF) {
+		/*
 		int temp = 0; //TODO: erase
 		for (int i = 0; i < BLOCK_NUM * BLOCK_SIZE; ++i) {
 			if (i == 0) printf("<Super>\n");							//TODO: erase
@@ -106,6 +107,7 @@ void FileSystem(char* input_file_name) {
 			if (i % BLOCK_NUM == BLOCK_NUM - 1) printf("\n\n");		//TODO: erase
 		}
 		printf("\n");
+		*/
 		
 		printf("%d: %c\n", ++line, io_command);
 		switch (io_command) {
