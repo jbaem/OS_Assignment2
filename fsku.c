@@ -41,7 +41,6 @@ typedef struct {
 } DirectoryEntry;
 
 unsigned char* data_storage;
-int cnt = 0;
 
 int main(int argc, char* argv[]) {
 	if (argc != 2) {
@@ -261,16 +260,13 @@ void DeleteFile(char* file_name) {
 		if (dbmap_index != 0) {
 			SetBitMap(D_BMAP_BASE, dbmap_index, 'n');
 		}
-		cnt--;
 	}
 	//delete iptr
 	SetBitMap(D_BMAP_BASE, curr_inode->iptr, 'n');
-	cnt--;
 	
 	//delete dptr
 	SetBitMap(D_BMAP_BASE, curr_inode->dptr, 'n');
-	cnt--;
-
+	
 	//delete inum in ibmap
 	DirectoryEntry* dir_entry = ((DirectoryEntry*)(data_storage + D_BLOCK_BASE) + inum - 3);
 	SetBitMap(I_BMAP_BASE, dir_entry->inum, 'n');
@@ -295,7 +291,6 @@ void SetBitMap(int base, int index, char flag) {
 }
 
 int CreateFile(char* file_name) {
-	if(cnt > 61) return -1;
 	//empty index
 	int empty_entry_index = FindEmptySpace();
 	if (empty_entry_index == -1) {
@@ -308,7 +303,6 @@ int CreateFile(char* file_name) {
 	if (find_dbmap == -1 || allocate_new_block == -1) {
 		return -1;
 	}
-	cnt += 2;
 	//set entry
 	DirectoryEntry* entry = ((DirectoryEntry*)(data_storage + D_BLOCK_BASE) + empty_entry_index);
 	entry->inum = empty_entry_index + 3;
