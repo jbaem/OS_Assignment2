@@ -302,7 +302,6 @@ int CreateFile(char* file_name) {
 	//empty index
 	int empty_entry_index = FindEmptySpace();
 	if (empty_entry_index == -1) {
-		printf("here");
 		return -1;
 	}
 	//set entry
@@ -316,6 +315,7 @@ int CreateFile(char* file_name) {
 	inode->fsize = 0;
 	inode->blocks = 2;
 	inode->dptr = FindDBmap();
+	printf("here");
 	inode->iptr = AllocateNewBlock();
 
 	if (inode->dptr == -1 || inode->iptr == -1) {
