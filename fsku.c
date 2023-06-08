@@ -146,7 +146,6 @@ void FileSystem(char* input_file_name) {
 }
 
 void WriteFile(char* file_name, int word_size) {
-	printf("0\n");
 	//inum in entry
 	int inum = FindFile(file_name);
 	if (inum == -1) {
@@ -173,12 +172,10 @@ void WriteFile(char* file_name, int word_size) {
 	
 		if (write_inode->fsize < BLOCK_SIZE) {
 			write_index = (unsigned char*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * write_inode->dptr + fsize);
-			printf("1\n");
 		}
 		else if(fsize != 0) {
 			int block_index = *((int*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * write_inode->iptr) + write_inode->blocks - 3);			
 			write_index = (unsigned char*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * block_index);
-			printf("2\n");
 		} 
 		else {
 			int block_index = AllocateNewBlock();
@@ -186,7 +183,6 @@ void WriteFile(char* file_name, int word_size) {
 				printf("No space\n");
 				return;
 			}
-			printf("3\n");	
 			*((int*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * write_inode->iptr) + write_inode->blocks - 2) = block_index;
 			write_inode->blocks += 1;
 			
@@ -194,14 +190,11 @@ void WriteFile(char* file_name, int word_size) {
 		}
 		
 		while (fsize + 1 <= BLOCK_SIZE && word_size > 0) {
-			printf("%d ",word_size);
 			*(write_index++) = letter;
 			(write_inode->fsize)++;
 			word_size--;
 			fsize++;
 		}
-		
-		printf("5\n");
 	}
 
 	return;
