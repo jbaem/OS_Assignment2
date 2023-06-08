@@ -157,10 +157,12 @@ void WriteFile(char* file_name, int word_size) {
 
 		if (write_inode->fsize < BLOCK_SIZE) {
 			write_index = (unsigned char*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * write_inode->dptr + fsize);
+			printf("1");
 		}
 		else if(fsize != 0) {
 			int block_index = *((int*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * write_inode->iptr) + write_inode->blocks - 3);			
 			write_index = (unsigned char*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * block_index);
+			printf("2");
 		} 
 		else {
 			int block_index = AllocateNewBlock();
@@ -168,7 +170,7 @@ void WriteFile(char* file_name, int word_size) {
 				printf("No space\n");
 				return;
 			}
-				
+			printf("3");	
 			*((int*)(data_storage + D_BLOCK_BASE + BLOCK_SIZE * write_inode->iptr) + write_inode->blocks - 2) = block_index;
 			write_inode->blocks += 1;
 			
@@ -347,12 +349,15 @@ int FindFile(char* file_name) {
 }
 
 int FindDBmap() {
+	//byte
 	int dbmap_index = 0;
+	//base
 	unsigned char* curr_dbmap = data_storage + D_BMAP_BASE;
 	for (int i = 0; i < 60; ++i) {
 		unsigned char curr = *(curr_dbmap + i);
 
 		if (curr != 0xFF) {
+			//bit
 			for (int j = 0; j < 8; ++j) {
 				if ((curr & (1 << (7 - j))) == 0) {
 					*(curr_dbmap + i) = curr | (1 << (7 - j));
