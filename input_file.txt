@@ -47,26 +47,3 @@ Az d
 KU d
 BB d
 Cc d
-Ab w 513
-Ac w 513
-Ad w 513
-Ae w 513
-Af w 513
-Ag w 513
-Ah w 513
-Ai w 513
-Aj w 513
-Ak w 513
-Al w 513
-Am w 513
-An w 513
-Ao w 513
-Ap w 513
-Aq w 513
-Ar w 513
-Az w 513
-Bb w 513
-Cc w 513
-Dd w 80000
-Ee w 13
-Al r 514
