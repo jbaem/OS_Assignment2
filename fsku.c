@@ -300,11 +300,18 @@ void SetBitMap(int base, int index, char flag) {
 
 int CreateFile(char* file_name) {
 	//empty index
-	printf("here");
 	int empty_entry_index = FindEmptySpace();
 	if (empty_entry_index == -1) {
 		return -1;
 	}
+	
+	//find space
+	int find_dbmap = FindDBMap();
+	int allocate_new_block = AllocateNewBlock();
+	if (find_dbmap == -1 || allocate_new_block == -1) {
+		return -1;
+	}
+
 	//set entry
 	DirectoryEntry* entry = ((DirectoryEntry*)(data_storage + D_BLOCK_BASE) + empty_entry_index);
 	entry->inum = empty_entry_index + 3;
@@ -315,12 +322,10 @@ int CreateFile(char* file_name) {
 	Inode* inode = ((Inode*)(data_storage + I_BLOCK_BASE) + inode_index);
 	inode->fsize = 0;
 	inode->blocks = 2;
-	inode->dptr = FindDBmap();
-	inode->iptr = AllocateNewBlock();
+	inode->dptr = find_dbmap
+	inode->iptr = allocate_new_block;
 
-	if (inode->dptr == -1 || inode->iptr == -1) {
-		return -1;
-	}
+	
 	SetBitMap(I_BMAP_BASE, inode_index, 'a');
 	
 	return inode_index;
