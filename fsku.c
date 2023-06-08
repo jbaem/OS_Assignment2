@@ -306,7 +306,7 @@ int CreateFile(char* file_name) {
 	}
 	
 	//find space
-	int find_dbmap = FindDBMap();
+	int find_dbmap = FindDBmap();
 	int allocate_new_block = AllocateNewBlock();
 	if (find_dbmap == -1 || allocate_new_block == -1) {
 		return -1;
