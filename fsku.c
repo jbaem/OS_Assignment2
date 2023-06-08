@@ -109,7 +109,6 @@ void FileSystem(char* input_file_name) {
 		printf("\n");
 		*/
 		
-		printf("%d: %c\n", ++line, io_command);
 		switch (io_command) {
 		case 'w':
 			fscanf(input_file, "%d", &word_size);
@@ -328,7 +327,6 @@ int AllocateNewBlock() {
 	//empty dbmap index
 	int empty_block_index = FindDBmap();
 	if (empty_block_index == -1) {
-		printf("creaete");
 		return -1;
 	}
 	
