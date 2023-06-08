@@ -378,16 +378,13 @@ int FindDBmap() {
 		if (curr != 0xFF) {
 			//bit
 			for (int j = 0; j < 8; ++j) {
-				if ((curr & (1 << (7 - j))) == 0) {
+				if (((curr >> (7 - j)) | 0) == 0) {
 					*(curr_dbmap + i) = curr | (1 << (7 - j));
 					return dbmap_index + j;
 				}
 			}
 		}
-		else {
-			dbmap_index += 8;
-			i--;
-		}
+		dbmap_index += 8;
 	}
 
 	return -1;
