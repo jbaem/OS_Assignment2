@@ -378,7 +378,7 @@ int FindDBmap() {
 			//bit
 			for (int j = 0; j < 8; ++j) {
 				if (((curr >> (7 - j)) | 0) == 0) {
-					if(dbmap_index * 8 + j == 57) return -1;
+					if(dbmap_index * 8 + j == 63) return -1;
 					*(curr_dbmap + i) = curr | (1 << (7 - j));
 					return dbmap_index + j;
 				}
