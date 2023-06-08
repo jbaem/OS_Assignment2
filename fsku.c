@@ -322,7 +322,7 @@ int CreateFile(char* file_name) {
 	Inode* inode = ((Inode*)(data_storage + I_BLOCK_BASE) + inode_index);
 	inode->fsize = 0;
 	inode->blocks = 2;
-	inode->dptr = find_dbmap
+	inode->dptr = find_dbmap;
 	inode->iptr = allocate_new_block;
 
 	
