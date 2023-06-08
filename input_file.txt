@@ -3,7 +3,6 @@ KU w 500
 KU w 500
 KU w 500
 KU w 500
-BB w 8192
 Aa w 5
 Cc w 513
 Cc w 511
