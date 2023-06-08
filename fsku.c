@@ -179,12 +179,12 @@ void WriteFile(char* file_name, int word_size) {
 		}
 		
 		while (fsize + 1 <= BLOCK_SIZE && word_size > 0) {
-			printf("5\n");
 			*(write_index++) = letter;
 			(write_inode->fsize)++;
 			word_size--;
 			fsize++;
 		}
+		printf("5\n");
 	}
 
 	return;
