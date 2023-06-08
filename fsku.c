@@ -150,7 +150,7 @@ void WriteFile(char* file_name, int word_size) {
 	//inum in entry
 	int inum = FindFile(file_name);
 	if (inum == -1) {
-	
+		
 		inum = CreateFile(file_name);
 		if (inum == -1) {
 			printf("No space\n");
@@ -300,6 +300,7 @@ void SetBitMap(int base, int index, char flag) {
 
 int CreateFile(char* file_name) {
 	//empty index
+	printf("here");
 	int empty_entry_index = FindEmptySpace();
 	if (empty_entry_index == -1) {
 		return -1;
@@ -315,13 +316,11 @@ int CreateFile(char* file_name) {
 	inode->fsize = 0;
 	inode->blocks = 2;
 	inode->dptr = FindDBmap();
-	printf("here");
 	inode->iptr = AllocateNewBlock();
 
 	if (inode->dptr == -1 || inode->iptr == -1) {
 		return -1;
 	}
-	printf("there");
 	SetBitMap(I_BMAP_BASE, inode_index, 'a');
 	
 	return inode_index;
