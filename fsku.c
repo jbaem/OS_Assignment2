@@ -293,9 +293,9 @@ void SetBitMap(int base, int index, char flag) {
 
 int CreateFile(char* file_name) {
 	//empty index
-	printf("creaete");
 	int empty_entry_index = FindEmptySpace();
 	if (empty_entry_index == -1) {
+		printf("creaete");
 		return -1;
 	}
 	
@@ -303,6 +303,7 @@ int CreateFile(char* file_name) {
 	int find_dbmap = FindDBmap();
 	int allocate_new_block = AllocateNewBlock();
 	if (find_dbmap == -1 || allocate_new_block == -1) {
+		printf("creaete!");
 		return -1;
 	}
 
