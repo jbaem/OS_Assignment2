@@ -302,6 +302,7 @@ int CreateFile(char* file_name) {
 	//empty index
 	int empty_entry_index = FindEmptySpace();
 	if (empty_entry_index == -1) {
+		printf("here");
 		return -1;
 	}
 	//set entry
