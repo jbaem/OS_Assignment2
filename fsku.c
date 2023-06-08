@@ -102,7 +102,7 @@ void FileSystem(char* input_file_name) {
 			if (i == D_BLOCK_BASE) printf("<d-block>\n");			//TODO: erase
 			if (i % BLOCK_SIZE == 0) printf(">%d th block\n", i / BLOCK_SIZE);
 			if (i % 8 == 0) printf("\n %d : ", ++temp);				//TODO: erase
-			printf("%02x ", *(data_storage + i));
+			printf("%c ", *(data_storage + i));
 			if (i % BLOCK_NUM == BLOCK_NUM - 1) printf("\n\n");		//TODO: erase
 		}
 		printf("\n");
