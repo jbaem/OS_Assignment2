@@ -43,15 +43,15 @@ typedef struct {
 unsigned char* data_storage;
 
 int main(int argc, char* argv[]) {
-//	if (argc != 2) {
-//		printf("Error: the number of arguments.\n");
-//		return 1;
-//	}
+	if (argc != 2) {
+		printf("Error: the number of arguments.\n");
+		return 1;
+	}
 
 	InitDataStorage();
 	InitRootDirectory();
 
-	FileSystem("input_file.txt");
+	FileSystem(argv[1]);
 
 	free(data_storage);
 
@@ -111,21 +111,10 @@ void FileSystem(char* input_file_name) {
 	}
 
 	fclose(input_file);
-	/*
-	int temp = 0; //TODO: erase
+	
 	for (int i = 0; i < BLOCK_NUM * BLOCK_SIZE; ++i) {
-		if (i == 0) printf("<Super>\n");							//TODO: erase
-		if (i == I_BMAP_BASE) printf("<i-bmap>\n");				//TODO: erase
-		if (i == D_BMAP_BASE) printf("<d-bmap>\n");				//TODO: erase
-		if (i == I_BLOCK_BASE) printf("<i-block>\n");			//TODO: erase
-		if (i == D_BLOCK_BASE) printf("<d-block>\n");			//TODO: erase
-		if (i % BLOCK_SIZE == 0) printf(">%d th block\n", i / BLOCK_SIZE);
-		if (i % 8 == 0) printf("\n %d : ", ++temp);				//TODO: erase
-		printf("%02x ", *(data_storage + i));
-		if (i % BLOCK_NUM == BLOCK_NUM - 1) printf("\n\n");		//TODO: erase
+		printf("%02x", *(data_storage + i));
 	}
-	*/
-	printf("\n");
 	return;
 }
 
@@ -315,6 +304,7 @@ int AllocateNewBlock() {
 	if (empty_block_index == -1) {
 		return -1;
 	}
+
 	SetBitMap(D_BMAP_BASE, empty_block_index, 'a');
 
 	return empty_block_index;
@@ -355,21 +345,17 @@ int FindDBmap() {
 	int dbmap_index = 0;
 	//base
 	unsigned char* curr_dbmap = (unsigned char*)(data_storage + D_BMAP_BASE);
-	for (int i = 0; i < BLOCK_SIZE / 2; ++i) {
-		unsigned char curr = *(curr_dbmap + i);
-		unsigned char arr[8];
-		arr[0] = curr & 128;
-		arr[1] = curr & 64;
-		arr[2] = curr & 32;
-		arr[3] = curr & 16;
-		arr[4] = curr & 8;
-		arr[5] = curr & 4;
-		arr[6] = curr & 2;
-		arr[7] = curr & 1;
-		
-		for (int j = 0; j < 8; ++j) {
-			if (arr[j] == 0) {
-				return dbmap_index + j;
+	for (int i = 0; i < 8; ++i) {
+		char curr = curr_dbmap[i];
+
+		if (curr != 0xFF) {
+			//bit
+			for (int j = 0; j < 8; ++j) {
+				if (((curr >> (7 - j)) & 1) == 0) {
+					if (i * 8 + j > 60) return -1;
+					*(curr_dbmap + i) = (curr | (1 << (7 - j)));
+					return dbmap_index + j;
+				}
 			}
 		}
 		dbmap_index += 8;
